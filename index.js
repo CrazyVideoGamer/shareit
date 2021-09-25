@@ -3,7 +3,7 @@ console.log("---------------------") // separater for nodemon dev
 let argv = process.argv.slice(2);
 if (argv.length < 1) {
   console.error("Please give the file or folder to share.");
-} else if (argv.length > 1) {
+} else if (argv.length > 2) {
   console.error("Too much arguments. Please provide only one argument.")
 } else if (argv.includes("--help") || argv.includes("-h")) {
   console.log(`shareIt - an easy way to transfer files/folders to different devices
@@ -39,9 +39,9 @@ try {
   const app = express();
 
   if (stats.isDirectory()) {
-    app.use("/:route", express.static(target), serveIndex(target)); // we use :route because then when you click on a link, it goes to localhost:3000/:route/path/to/file, instead of localhost:3000/path/to/file which doesn't exist.
+    app.use("/", express.static(target), serveIndex(target)); // nevermind `we use :route because then when you click on a link, it goes to localhost:3000/:route/path/to/file, instead of localhost:3000/path/to/file which doesn't exist`, b/c i am using ngrok now.
   } else {
-    app.get("/:route", (req, res) => {
+    app.get("/", (req, res) => {
       res.download(target);
     })
   }
@@ -61,31 +61,39 @@ try {
 
       console.log("Creating url...")
 
+			const ngrok = require("ngrok")
+
       async function createRoute() {
         const namor = require("namor");
         const route = namor.generate({ words: 2, saltLength: 5 })
 
-        const ip = require("ip");
-        const addr = ip.address();
+				remakeRoute = false;
 
-        try {
-          const axios = require("axios").default;
-          let res = await axios.post("http://localhost:3000", {
-              route: route,
-              info: {
-                addr: addr,
-                port: port
-              }
-          })
-          if (res.data === "route created") {
-            console.log(`Shared! Go to https://shareit.crazyvideogamer.repl.co/${route}`);
-            remakeRoute = false;
-          }
-        } catch {
-          console.error("Error: Unable to create url. Our server may be down.");
-          server.close();
-          remakeRoute = false;
-        }
+				const url = await ngrok.connect(port);
+
+				console.log(url);	
+
+        //const ip = require("ip");
+        //const addr = ip.address();
+
+        //try {
+        //  const axios = require("axios").default;
+        //  let res = await axios.post("http://localhost:3000", {
+        //      route: route,
+        //      info: {
+        //        addr: addr,
+        //        port: port
+        //      }
+        //  })
+        //  if (res.data === "route created") {
+        //    console.log(`Shared! Go to https://shareit.crazyvideogamer.repl.co/${route}`);
+        //    remakeRoute = false;
+        //  }
+        //} catch {
+        //  console.error("Error: Unable to create url. Our server may be down.");
+        //  server.close();
+        //  remakeRoute = false;
+        //}
       }
       // await createRoute();
       while (remakeRoute === true) {
