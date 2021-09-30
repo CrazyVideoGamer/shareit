@@ -1,4 +1,4 @@
-function share(target, port) {
+function share(onServerStart, target, port) {
 
 const fs = require("fs");
 const path = require("path");
@@ -29,56 +29,15 @@ try {
   const portfinder = require("portfinder");
 
   portfinder.getPort({
-    port: 8000,    // minimum port
-    stopPort: 8080 // maximum port
+    port: port || 8000,    // minimum port
+    stopPort: port || 8080 // maximum port
   }, (err, port) => {
     if (err) {
       console.error("Unable to start server. Ports 8000 to 8080 are already be used");
     } else {
 
     server = app.listen(port, async () => {
-      let remakeRoute = true; // will stay true in the case of a route name collision
-
-      console.log("Creating url...")
-
-			const ngrok = require("ngrok")
-
-      async function createRoute() {
-        const namor = require("namor");
-        const route = namor.generate({ words: 2, saltLength: 5 })
-
-				remakeRoute = false;
-
-				const url = await ngrok.connect(port);
-
-				console.log(url);	
-
-        //const ip = require("ip");
-        //const addr = ip.address();
-
-        //try {
-        //  const axios = require("axios").default;
-        //  let res = await axios.post("http://localhost:3000", {
-        //      route: route,
-        //      info: {
-        //        addr: addr,
-        //        port: port
-        //      }
-        //  })
-        //  if (res.data === "route created") {
-        //    console.log(`Shared! Go to https://shareit.crazyvideogamer.repl.co/${route}`);
-        //    remakeRoute = false;
-        //  }
-        //} catch {
-        //  console.error("Error: Unable to create url. Our server may be down.");
-        //  server.close();
-        //  remakeRoute = false;
-        //}
-      }
-      // await createRoute();
-      while (remakeRoute === true) {
-        await createRoute();
-      }
+      await onServerStart();
     })
 
     }
