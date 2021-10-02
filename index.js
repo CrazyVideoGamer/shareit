@@ -1,4 +1,5 @@
-function share(onServerStart, target, port) {
+function share(target, port, onServerStart) {
+console.log(target, port)
 
 const fs = require("fs");
 const path = require("path");
@@ -37,7 +38,7 @@ try {
     } else {
 
     server = app.listen(port, async () => {
-      await onServerStart();
+      await onServerStart(port);
     })
 
     }
